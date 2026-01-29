@@ -68,6 +68,35 @@ class TicketScreen extends StatelessWidget {
           padding: const EdgeInsets.all(24),
           child: Column(
             children: [
+              // Success Header
+              const SizedBox(height: 20),
+              Container(
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Color(0xFF1FAAF1),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0x401FAAF1),
+                      blurRadius: 20,
+                      spreadRadius: 5,
+                    ),
+                  ],
+                ),
+                padding: const EdgeInsets.all(24),
+                child: const Icon(Icons.check, size: 60, color: Colors.white),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                l10n.successTitle,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+              const SizedBox(height: 32),
+
               AppCard(
                 padding: const EdgeInsets.all(24),
                 child: Column(
@@ -164,34 +193,55 @@ class TicketScreen extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 32),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 12,
-                        horizontal: 24,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.8),
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: Text(
-                        '${ticket.price} EGP',
-                        style: Theme.of(context).textTheme.headlineMedium
-                            ?.copyWith(
-                              color: Colors.green[700],
-                              fontWeight: FontWeight.w900,
-                            ),
-                      ),
-                    ),
                   ],
                 ),
               ),
               const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: () => context.go('/planner'),
-                icon: const Icon(Icons.home),
-                label: Text(l10n.backToHome),
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
+
+              // Download Button
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    // Mock download action
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Downloading ticket...')),
+                    );
+                  },
+                  icon: const Icon(Icons.download),
+                  label: Text(l10n.downloadTicket),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF1FAAF1),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Back To Home Button
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: OutlinedButton(
+                  onPressed: () => context.go('/planner'),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Color(0xFF1FAAF1)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                  ),
+                  child: Text(
+                    l10n.backToHome,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1FAAF1),
+                    ),
+                  ),
                 ),
               ),
             ],

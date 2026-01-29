@@ -5,7 +5,9 @@ import 'package:smart_transit/models/station_model.dart';
 import 'package:smart_transit/state/app_state.dart';
 import 'package:smart_transit/state/settings_provider.dart';
 
-import 'package:smart_transit/widgets/station_label.dart';
+// import 'package:smart_transit/widgets/station_label.dart';
+
+import 'package:smart_transit/l10n/gen/app_localizations.dart';
 
 class RouteResultScreen extends ConsumerWidget {
   const RouteResultScreen({super.key});
@@ -14,6 +16,7 @@ class RouteResultScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final route = ref.watch(routeResultProvider);
     final isArabic = ref.watch(isArabicProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     if (route == null) {
       return Scaffold(
@@ -84,23 +87,30 @@ class RouteResultScreen extends ConsumerWidget {
                   final lastSeg = route.segments.last;
                   return _buildTimelineNode(
                     isLast: true,
+                    isFirst: false,
                     stationName: lastSeg.to.getLocalizedName(isArabic),
                     time: "Now + ${route.totalDurationMinutes}", // Mock time
-                    lineColor: _getColor(lastSeg.mode),
-                    transportType: lastSeg.mode.name.toUpperCase(),
-                    lineName: lastSeg.to.lines.isNotEmpty
-                        ? lastSeg.to.lines.first
-                        : null,
+                    lineColor: Colors.transparent, // No line after last node
+                    transportType: "ARRIVE",
+                    lineName: null,
                   );
                 }
 
                 final seg = route.segments[index];
+                final isFirst = index == 0;
+                // If this is NOT the first segment, it's a transfer from the previous one
+                final isTransfer = !isFirst;
+
                 return _buildTimelineNode(
                   isLast: false,
+                  isFirst: isFirst,
+                  isTransfer: isTransfer,
                   stationName: seg.from.getLocalizedName(isArabic),
-                  time: "10:00 ص", // Mock time
+                  time: "10:${index}0 ${isArabic ? 'ص' : 'AM'}", // Mock time
                   lineColor: _getColor(seg.mode),
-                  details: "الخط الاول (اتجاه حلوان)", // Mock details
+                  details: seg.mode == TransitType.metro
+                      ? "${isArabic ? 'الخط' : 'Line'} ${seg.from.lines.first}"
+                      : seg.mode.name.toUpperCase(),
                   transportType: seg.mode.name.toUpperCase(),
                   lineName: seg.from.lines.isNotEmpty
                       ? seg.from.lines.first
@@ -124,9 +134,12 @@ class RouteResultScreen extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(25),
                   ),
                 ),
-                child: const Text(
-                  'شراء التذكره لهذا المسار',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                child: Text(
+                  l10n.buyTicket, // "شراء التذكره لهذا المسار"
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
@@ -152,12 +165,14 @@ class RouteResultScreen extends ConsumerWidget {
 
   Widget _buildTimelineNode({
     required bool isLast,
+    required bool isFirst,
+    bool isTransfer = false,
     required String stationName,
     required String time,
     required Color lineColor,
     String? details,
-    String? transportType, // Add this
-    String? lineName, // Add this
+    String? transportType,
+    String? lineName,
   }) {
     return IntrinsicHeight(
       child: Row(
@@ -165,22 +180,49 @@ class RouteResultScreen extends ConsumerWidget {
         children: [
           // Time
           SizedBox(
-            width: 60,
+            width: 65,
             child: Text(
               time,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
             ),
           ),
           // Line & Dot
           Column(
             children: [
-              Icon(
-                isLast ? Icons.location_on : Icons.circle_outlined,
-                color: lineColor,
-                size: 20,
+              // If it's a transfer, show a special icon above the dot?
+              // Or the dot itself is the transfer point.
+              Container(
+                width: 20,
+                height: 20,
+                decoration: BoxDecoration(
+                  color: isLast
+                      ? Colors.red
+                      : (isTransfer ? Colors.orange : Colors.white),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: isLast
+                        ? Colors.red
+                        : (isTransfer ? Colors.orange : lineColor),
+                    width: 3,
+                  ),
+                ),
+                child: Center(
+                  child: Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: isLast
+                          ? Colors.white
+                          : (isTransfer ? Colors.white : lineColor),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
               ),
               if (!isLast)
-                Expanded(child: Container(width: 2, color: lineColor)),
+                Expanded(
+                  child: Container(width: 3, color: lineColor.withAlpha(100)),
+                ),
             ],
           ),
           const SizedBox(width: 16),
@@ -189,20 +231,64 @@ class RouteResultScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                StationLabel(
-                  stationName: stationName,
-                  transportType: transportType,
-                  lineName: lineName,
-                ),
-                if (details != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4, bottom: 24),
-                    child: Text(
-                      details,
-                      style: const TextStyle(color: Colors.grey, fontSize: 12),
+                // Transfer Label
+                if (isTransfer)
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.orange[100],
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Icon(Icons.swap_calls, size: 12, color: Colors.orange),
+                        SizedBox(width: 4),
+                        Text(
+                          "Change Line", // Could use l10n here if passed
+                          style: TextStyle(
+                            color: Colors.orange,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                if (isLast) const SizedBox(height: 24),
+
+                Text(
+                  stationName,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                if (details != null && !isLast)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Row(
+                      children: [
+                        Icon(
+                          _getTransportIcon(transportType),
+                          size: 14,
+                          color: Colors.grey,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          details,
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                const SizedBox(height: 32),
               ],
             ),
           ),
@@ -211,16 +297,22 @@ class RouteResultScreen extends ConsumerWidget {
     );
   }
 
+  IconData _getTransportIcon(String? type) {
+    if (type == 'METRO') return Icons.subway;
+    if (type == 'BUS' || type == 'BRT') return Icons.directions_bus;
+    return Icons.train;
+  }
+
   Color _getColor(TransitType type) {
     switch (type) {
       case TransitType.metro:
-        return Colors.red;
+        return const Color(0xFFE30613); // Metro Red
       case TransitType.lrt:
-        return Colors.green;
+        return const Color(0xFF009CA6); // LRT Teal
       case TransitType.monorail:
-        return Colors.purple;
+        return const Color(0xFF707372); // Monorail Grey
       case TransitType.brt:
-        return Colors.orange;
+        return const Color(0xFFF37021); // BRT Orange
     }
   }
 }

@@ -283,4 +283,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get inactive => 'غير نشط';
+
+  @override
+  String get successTitle => 'تمت العمليه بنجاح!';
+
+  @override
+  String get downloadTicket => 'تنزيل التذكرة';
 }

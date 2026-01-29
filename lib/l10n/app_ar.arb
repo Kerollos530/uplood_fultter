@@ -90,5 +90,7 @@
   "actions": "الإجراءات",
   "status": "الحالة",
   "active": "نشط",
-  "inactive": "غير نشط"
+  "inactive": "غير نشط",
+  "successTitle": "تمت العمليه بنجاح!",
+  "downloadTicket": "تنزيل التذكرة"
 }

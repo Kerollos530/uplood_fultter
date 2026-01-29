@@ -283,4 +283,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get inactive => 'Inactive';
+
+  @override
+  String get successTitle => 'Process Completed Successfully!';
+
+  @override
+  String get downloadTicket => 'Download Ticket';
 }

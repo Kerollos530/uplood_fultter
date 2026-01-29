@@ -98,7 +98,7 @@ class ProfileScreen extends ConsumerWidget {
           children: [
             CircleAvatar(
               radius: 50,
-              backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+              backgroundColor: Theme.of(context).primaryColor.withAlpha(26),
               child: Icon(
                 Icons.person,
                 size: 60,
@@ -281,32 +281,73 @@ class ProfileScreen extends ConsumerWidget {
     bool notificationsEnabled,
   ) {
     final l10n = AppLocalizations.of(context)!;
+    final primaryColor = Theme.of(context).primaryColor;
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Column(
         children: [
-          SwitchListTile(
-            secondary: const Icon(Icons.language),
-            title: Text(l10n.language),
-            value: isArabic,
-            onChanged: (val) => ref.read(isArabicProvider.notifier).state = val,
+          // Language Setting (Dropdown style)
+          ListTile(
+            leading: Icon(Icons.language, color: primaryColor),
+            title: Text(
+              l10n.language,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  isArabic ? "العربية" : "English",
+                  style: const TextStyle(color: Colors.grey, fontSize: 14),
+                ),
+                const SizedBox(width: 8),
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  size: 16,
+                  color: Colors.grey,
+                ),
+              ],
+            ),
+            onTap: () {
+              // Toggle logic for demo
+              ref.read(isArabicProvider.notifier).state = !isArabic;
+            },
           ),
-          const Divider(height: 1),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.0),
+            child: Divider(height: 1),
+          ),
+
+          // Dark Mode Setting (Switch)
           SwitchListTile(
-            secondary: const Icon(Icons.dark_mode),
-            title: Text(l10n.darkMode),
+            secondary: Icon(Icons.dark_mode, color: primaryColor),
+            title: Text(
+              l10n.darkMode,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
             value: isDark,
             onChanged: (val) =>
                 ref.read(isDarkModeProvider.notifier).state = val,
+            activeTrackColor: primaryColor,
           ),
-          const Divider(height: 1),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.0),
+            child: Divider(height: 1),
+          ),
+
+          // Notifications Setting (Switch)
           SwitchListTile(
-            secondary: const Icon(Icons.notifications),
-            title: Text(l10n.notifications),
+            secondary: Icon(Icons.notifications, color: primaryColor),
+            title: Text(
+              l10n.notifications,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
             value: notificationsEnabled,
             onChanged: (val) =>
                 ref.read(notificationsProvider.notifier).state = val,
+            activeTrackColor: primaryColor,
           ),
         ],
       ),

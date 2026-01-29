@@ -90,5 +90,7 @@
   "actions": "Actions",
   "status": "Status",
   "active": "Active",
-  "inactive": "Inactive"
+  "inactive": "Inactive",
+  "successTitle": "Process Completed Successfully!",
+  "downloadTicket": "Download Ticket"
 }

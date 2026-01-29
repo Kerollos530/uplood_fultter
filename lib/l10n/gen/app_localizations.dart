@@ -649,6 +649,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Inactive'**
   String get inactive;
+
+  /// No description provided for @successTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Process Completed Successfully!'**
+  String get successTitle;
+
+  /// No description provided for @downloadTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Ticket'**
+  String get downloadTicket;
 }
 
 class _AppLocalizationsDelegate

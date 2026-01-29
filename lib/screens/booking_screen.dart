@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:smart_transit/state/app_state.dart';
 import 'package:smart_transit/state/settings_provider.dart';
+import 'package:smart_transit/l10n/gen/app_localizations.dart';
 
 class BookingScreen extends ConsumerStatefulWidget {
   const BookingScreen({super.key});
@@ -13,11 +14,13 @@ class BookingScreen extends ConsumerStatefulWidget {
 
 class _BookingScreenState extends ConsumerState<BookingScreen> {
   int _passengerCount = 1;
+  bool _showSummary = false;
 
   @override
   Widget build(BuildContext context) {
     final route = ref.watch(routeResultProvider);
     final isArabic = ref.watch(isArabicProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     if (route == null) {
       return const Scaffold(body: Center(child: Text("No route")));
@@ -29,16 +32,27 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text(
-          'سعر التذكرة',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        title: Text(
+          _showSummary
+              ? l10n.details
+              : l10n.price, // "Order Summary" / "Ticket Price"
+          style: const TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => context.pop(),
+          onPressed: () {
+            if (_showSummary) {
+              setState(() => _showSummary = false);
+            } else {
+              context.pop();
+            }
+          },
         ),
       ),
       body: Column(
@@ -72,13 +86,13 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                             route.segments.first.from.getLocalizedName(
                               isArabic,
                             ),
-                            "محطة البداية",
+                            l10n.fromStation,
                           ),
                           const Divider(height: 24),
                           _buildRouteRow(
                             Icons.location_on,
                             route.segments.last.to.getLocalizedName(isArabic),
-                            "الوجهه",
+                            l10n.toStation,
                           ),
                         ],
                       ),
@@ -103,100 +117,165 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                 ),
               ],
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      "الركاب\nحدد العدد",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF2F2F2),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.remove_circle_outline),
-                            onPressed: () {
-                              if (_passengerCount > 1) {
-                                setState(() => _passengerCount--);
-                              }
-                            },
-                          ),
-                          Text(
-                            "$_passengerCount",
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.add_circle,
-                              color: Color(0xFF1FAAF1),
-                            ),
-                            onPressed: () {
-                              if (_passengerCount < 10) {
-                                setState(() => _passengerCount++);
-                              }
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      "Total Price\nالسعر الاجمالي",
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                    Text(
-                      "$totalPrice EGP",
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 24,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      context.push('/payment');
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1FAAF1),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                    ),
-                    child: const Text(
-                      'شراء التذكرة',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            child: _showSummary
+                ? _buildSummaryView(totalPrice, l10n)
+                : _buildPassengerSelectionView(totalPrice, l10n),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildPassengerSelectionView(
+    double totalPrice,
+    AppLocalizations l10n,
+  ) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              "Passengers\nحدد العدد", // Could use l10n
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFFF2F2F2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.remove_circle_outline),
+                    onPressed: () {
+                      if (_passengerCount > 1) {
+                        setState(() => _passengerCount--);
+                      }
+                    },
+                  ),
+                  Text(
+                    "$_passengerCount",
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.add_circle,
+                      color: Color(0xFF1FAAF1),
+                    ),
+                    onPressed: () {
+                      if (_passengerCount < 10) {
+                        setState(() => _passengerCount++);
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(l10n.totalPrice, style: const TextStyle(color: Colors.grey)),
+            Text(
+              "$totalPrice EGP",
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        SizedBox(
+          width: double.infinity,
+          height: 50,
+          child: ElevatedButton(
+            onPressed: () {
+              setState(() => _showSummary = true);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF1FAAF1),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25),
+              ),
+            ),
+            child: const Text(
+              'Continue', // l10n.continue
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSummaryView(double totalPrice, AppLocalizations l10n) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text("Tickets", style: TextStyle(color: Colors.grey)),
+            Text(
+              "x$_passengerCount",
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: const [
+            Text("Class", style: TextStyle(color: Colors.grey)),
+            Text("Standard", style: TextStyle(fontWeight: FontWeight.bold)),
+          ],
+        ),
+        const Divider(height: 24),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              l10n.totalPrice,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+            Text(
+              "$totalPrice EGP",
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 24,
+                color: Color(0xFF1FAAF1),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        SizedBox(
+          width: double.infinity,
+          height: 50,
+          child: ElevatedButton(
+            onPressed: () {
+              context.push('/payment');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF1FAAF1),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25),
+              ),
+            ),
+            child: Text(
+              l10n.buyTicket,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
