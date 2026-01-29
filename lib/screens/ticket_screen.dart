@@ -170,7 +170,7 @@ class TicketScreen extends StatelessWidget {
                         horizontal: 24,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.1),
+                        color: Colors.white.withValues(alpha: 0.8),
                         borderRadius: BorderRadius.circular(30),
                       ),
                       child: Text(

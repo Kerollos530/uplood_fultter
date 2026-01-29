@@ -1,11 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_transit/models/user_model.dart';
 import 'package:smart_transit/services/mock_auth_service.dart';
+import 'package:smart_transit/models/failure.dart';
 
 final authServiceProvider = Provider((ref) => MockAuthService());
 
 final authLoadingProvider = StateProvider<bool>((ref) => false);
-final authErrorProvider = StateProvider<String?>((ref) => null);
+final authErrorProvider = StateProvider<Failure?>((ref) => null);
 
 class AuthState extends StateNotifier<UserModel?> {
   final MockAuthService _authService;
@@ -16,8 +17,12 @@ class AuthState extends StateNotifier<UserModel?> {
   }
 
   Future<void> _checkSession() async {
-    final user = await _authService.getCurrentUser();
-    state = user;
+    try {
+      final user = await _authService.getCurrentUser();
+      state = user;
+    } catch (_) {
+      // Session restoration failure is silent usually
+    }
   }
 
   Future<void> login(String email, String password) async {
@@ -26,10 +31,7 @@ class AuthState extends StateNotifier<UserModel?> {
       _ref.read(authErrorProvider.notifier).state = null;
       state = await _authService.login(email, password);
     } catch (e) {
-      _ref.read(authErrorProvider.notifier).state = e.toString().replaceAll(
-        'Exception: ',
-        '',
-      );
+      _handleAuthError(e);
     } finally {
       _ref.read(authLoadingProvider.notifier).state = false;
     }
@@ -41,10 +43,7 @@ class AuthState extends StateNotifier<UserModel?> {
       _ref.read(authErrorProvider.notifier).state = null;
       state = await _authService.signup(name, email, password);
     } catch (e) {
-      _ref.read(authErrorProvider.notifier).state = e.toString().replaceAll(
-        'Exception: ',
-        '',
-      );
+      _handleAuthError(e);
     } finally {
       _ref.read(authLoadingProvider.notifier).state = false;
     }
@@ -57,6 +56,17 @@ class AuthState extends StateNotifier<UserModel?> {
       state = null;
     } finally {
       _ref.read(authLoadingProvider.notifier).state = false;
+    }
+  }
+
+  void _handleAuthError(Object error) {
+    String message = error.toString().replaceAll('Exception: ', '');
+    // In a real app, you would map specific error codes here.
+    // Since our mock service throws Arabic strings directly, we use them.
+    if (message.contains('SocketException') || message.contains('Network')) {
+      _ref.read(authErrorProvider.notifier).state = const NetworkFailure();
+    } else {
+      _ref.read(authErrorProvider.notifier).state = AuthFailure(message);
     }
   }
 }

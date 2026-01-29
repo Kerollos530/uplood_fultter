@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:smart_transit/state/auth_provider.dart';
+import 'package:smart_transit/models/failure.dart';
 
 import 'package:smart_transit/l10n/gen/app_localizations.dart';
 
@@ -31,10 +32,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final l10n = AppLocalizations.of(context)!;
 
     // 2. Listen for errors
-    ref.listen<String?>(authErrorProvider, (previous, next) {
+    ref.listen<Failure?>(authErrorProvider, (previous, next) {
       if (next != null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(next), backgroundColor: Colors.red),
+          SnackBar(content: Text(next.message), backgroundColor: Colors.red),
         );
       }
     });
@@ -249,6 +250,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ), // Use Google colors usually, but icon color works
                 ],
               ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    l10n.dontHaveAccount,
+                    style: const TextStyle(color: Colors.grey),
+                  ),
+                  TextButton(
+                    onPressed: () => context.push('/signup'),
+                    child: Text(
+                      l10n.createAccount, // or signupButton
+                      style: const TextStyle(
+                        color: Color(0xFF1FAAF1),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
             ],
           ),
         ),

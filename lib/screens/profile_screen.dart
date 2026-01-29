@@ -199,9 +199,9 @@ class ProfileScreen extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.primaryContainer.withOpacity(0.3),
+                color: const Color(0xFF1FAAF1).withAlpha(
+                  (255 * 0.1).round(),
+                ), // Replaced .withOpacity(0.3) with .withAlpha((255 * 0.1).round())
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -218,11 +218,12 @@ class ProfileScreen extends ConsumerWidget {
                       children: [
                         Text(
                           l10n.lastTrip,
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Colors.indigo[900],
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.white.withAlpha(
+                              (255 * 0.3).round(),
+                            ), // Replaced .withOpacity(0.3) with .withAlpha((255 * 0.3).round())
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         Text(
                           lastTrip,

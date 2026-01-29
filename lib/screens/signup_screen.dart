@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:smart_transit/state/auth_provider.dart';
+import 'package:smart_transit/models/failure.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
@@ -29,10 +30,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     final isLoading = ref.watch(authLoadingProvider);
 
     // 2. Listen for errors
-    ref.listen<String?>(authErrorProvider, (previous, next) {
+    ref.listen<Failure?>(authErrorProvider, (previous, next) {
       if (next != null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(next), backgroundColor: Colors.red),
+          SnackBar(content: Text(next.message), backgroundColor: Colors.red),
         );
       }
     });
