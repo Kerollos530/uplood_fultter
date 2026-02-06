@@ -4,13 +4,14 @@ import 'package:smart_transit/models/route_model.dart';
 import 'package:smart_transit/models/ticket_and_landmark_models.dart';
 import 'package:smart_transit/services/routing_service.dart';
 import 'package:smart_transit/data/repositories/station_repository.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
+
+import 'package:smart_transit/data/repositories/ticket_repository.dart';
 
 // ROUTING
 // ROUTING
 final routingServiceProvider = Provider((ref) => RoutingService());
 final stationRepositoryProvider = Provider((ref) => StationRepository());
+final ticketRepositoryProvider = Provider((ref) => TicketRepository());
 
 final routeLoadingProvider = StateProvider<bool>((ref) => false);
 final routeErrorProvider = StateProvider<String?>((ref) => null);
@@ -26,17 +27,16 @@ final historyErrorProvider = StateProvider<String?>((ref) => null);
 
 class HistoryNotifier extends StateNotifier<List<TicketModel>> {
   final Ref _ref;
+  final TicketRepository _repository;
 
-  HistoryNotifier(this._ref) : super([]) {
+  HistoryNotifier(this._ref, this._repository) : super([]) {
     _loadHistory();
   }
 
   Future<void> _loadHistory() async {
     _ref.read(historyLoadingProvider.notifier).state = true;
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final List<String> list = prefs.getStringList('ticket_history') ?? [];
-      state = list.map((e) => TicketModel.fromJson(jsonDecode(e))).toList();
+      state = await _repository.getTickets();
     } catch (e) {
       _ref.read(historyErrorProvider.notifier).state = e.toString();
     } finally {
@@ -45,15 +45,12 @@ class HistoryNotifier extends StateNotifier<List<TicketModel>> {
   }
 
   Future<void> addTicket(TicketModel ticket) async {
-    _ref.read(historyLoadingProvider.notifier).state =
-        true; // Though often instant
+    _ref.read(historyLoadingProvider.notifier).state = true;
     try {
+      await _repository.saveTicket(ticket);
+      // OPTIMISTIC UPDATE: Update UI state immediately after successful save
+      // Alternatively, re-fetch from repo to ensure sync
       state = [...state, ticket];
-      final prefs = await SharedPreferences.getInstance();
-      final List<String> list = state
-          .map((e) => jsonEncode(e.toJson()))
-          .toList();
-      await prefs.setStringList('ticket_history', list);
     } catch (e) {
       _ref.read(historyErrorProvider.notifier).state = "Failed to save ticket";
     } finally {
@@ -63,6 +60,7 @@ class HistoryNotifier extends StateNotifier<List<TicketModel>> {
 }
 
 final historyProvider =
-    StateNotifierProvider<HistoryNotifier, List<TicketModel>>(
-      (ref) => HistoryNotifier(ref),
-    );
+    StateNotifierProvider<HistoryNotifier, List<TicketModel>>((ref) {
+      final repo = ref.watch(ticketRepositoryProvider);
+      return HistoryNotifier(ref, repo);
+    });

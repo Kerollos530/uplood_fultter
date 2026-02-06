@@ -6,6 +6,7 @@ import 'package:smart_transit/widgets/app_card.dart';
 import 'package:smart_transit/widgets/station_label.dart';
 import 'package:smart_transit/l10n/gen/app_localizations.dart';
 import 'package:smart_transit/theme/app_theme.dart';
+import 'package:smart_transit/theme/app_layout.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_transit/state/app_state.dart';
 
@@ -53,11 +54,11 @@ class TicketScreen extends ConsumerWidget {
       appBar: AppBar(title: Text(l10n.ticketTitle)),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(AppLayout.pagePadding),
           child: Column(
             children: [
               // Success Header
-              const SizedBox(height: 20),
+              const SizedBox(height: AppLayout.spacingMedium), // Was 20
               Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
@@ -70,10 +71,10 @@ class TicketScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(AppLayout.pagePadding),
                 child: const Icon(Icons.check, size: 60, color: Colors.white),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppLayout.spacingLarge),
               Text(
                 l10n.successTitle,
                 textAlign: TextAlign.center,
@@ -83,7 +84,7 @@ class TicketScreen extends ConsumerWidget {
                   color: Colors.black,
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: AppLayout.spacingXLarge),
 
               AppCard(
                 padding: const EdgeInsets.all(24),
@@ -96,13 +97,13 @@ class TicketScreen extends ConsumerWidget {
                         color: Theme.of(context).primaryColor,
                       ),
                     ),
-                    const Divider(height: 32),
+                    const Divider(height: AppLayout.spacingXLarge),
                     QrImageView(
                       data: ticket.qrString,
                       version: QrVersions.auto,
                       size: 200,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppLayout.spacingMedium),
                     Text(
                       ticket.ticketId,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -148,7 +149,7 @@ class TicketScreen extends ConsumerWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppLayout.spacingLarge),
 
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -166,8 +167,8 @@ class TicketScreen extends ConsumerWidget {
                         ),
                         const Padding(
                           padding: EdgeInsets.symmetric(
-                            horizontal: 16.0,
-                            vertical: 8,
+                            horizontal: AppLayout.spacingMedium,
+                            vertical: AppLayout.spacingSmall,
                           ),
                           child: Icon(Icons.arrow_forward, color: Colors.grey),
                         ),
@@ -221,7 +222,9 @@ class TicketScreen extends ConsumerWidget {
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: AppTheme.primaryBlue),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
+                      borderRadius: BorderRadius.circular(
+                        AppLayout.radiusLarge,
+                      ),
                     ),
                   ),
                   child: Text(

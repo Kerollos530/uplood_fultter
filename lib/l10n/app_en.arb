@@ -92,5 +92,17 @@
   "active": "Active",
   "inactive": "Inactive",
   "successTitle": "Process Completed Successfully!",
-  "downloadTicket": "Download Ticket"
+  "downloadTicket": "Download Ticket",
+  "resetPasswordHeader1": "Reset",
+  "resetPasswordHeader2": "Password",
+  "resetPasswordSubtitle": "Create a new strong and safe password to protect your account from unauthorized access.",
+  "newPassword": "New Password",
+  "passwordStrengthMedium": "Medium",
+  "passwordChangedSuccess": "Password changed successfully",
+  "confirmButton": "Confirm",
+  "adminModeWarning": "⚠️ Admin Mode: Changes are temporary.",
+  "passengers": "Passengers",
+  "selectCount": "Select Count",
+  "standardClass": "Standard",
+  "tickets": "Tickets"
 }

@@ -661,6 +661,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Download Ticket'**
   String get downloadTicket;
+
+  /// No description provided for @resetPasswordHeader1.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get resetPasswordHeader1;
+
+  /// No description provided for @resetPasswordHeader2.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get resetPasswordHeader2;
+
+  /// No description provided for @resetPasswordSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a new strong and safe password to protect your account from unauthorized access.'**
+  String get resetPasswordSubtitle;
+
+  /// No description provided for @newPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New Password'**
+  String get newPassword;
+
+  /// No description provided for @passwordStrengthMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get passwordStrengthMedium;
+
+  /// No description provided for @passwordChangedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Password changed successfully'**
+  String get passwordChangedSuccess;
+
+  /// No description provided for @confirmButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirmButton;
+
+  /// No description provided for @adminModeWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'⚠️ Admin Mode: Changes are temporary.'**
+  String get adminModeWarning;
+
+  /// No description provided for @passengers.
+  ///
+  /// In en, this message translates to:
+  /// **'Passengers'**
+  String get passengers;
+
+  /// No description provided for @selectCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Count'**
+  String get selectCount;
+
+  /// No description provided for @standardClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get standardClass;
+
+  /// No description provided for @tickets.
+  ///
+  /// In en, this message translates to:
+  /// **'Tickets'**
+  String get tickets;
 }
 
 class _AppLocalizationsDelegate

@@ -92,5 +92,17 @@
   "active": "نشط",
   "inactive": "غير نشط",
   "successTitle": "تمت العمليه بنجاح!",
-  "downloadTicket": "تنزيل التذكرة"
+  "downloadTicket": "تنزيل التذكرة",
+  "resetPasswordHeader1": "اعادة تعيين",
+  "resetPasswordHeader2": "كلمة المرور",
+  "resetPasswordSubtitle": "قم بانشاء كلمه مرور جديده قويه وامنه لحمايه حسابك من الوصول الغير مصرح به",
+  "newPassword": "كلمة المرور الجديدة",
+  "passwordStrengthMedium": "متوسطة",
+  "passwordChangedSuccess": "تم تغيير كلمة المرور بنجاح",
+  "confirmButton": "تأكيد",
+  "adminModeWarning": "⚠️ وضع المسؤول: التغييرات مؤقتة.",
+  "passengers": "الركاب",
+  "selectCount": "حدد العدد",
+  "standardClass": "قياسية",
+  "tickets": "تذاكر"
 }

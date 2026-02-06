@@ -289,4 +289,41 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get downloadTicket => 'تنزيل التذكرة';
+
+  @override
+  String get resetPasswordHeader1 => 'اعادة تعيين';
+
+  @override
+  String get resetPasswordHeader2 => 'كلمة المرور';
+
+  @override
+  String get resetPasswordSubtitle =>
+      'قم بانشاء كلمه مرور جديده قويه وامنه لحمايه حسابك من الوصول الغير مصرح به';
+
+  @override
+  String get newPassword => 'كلمة المرور الجديدة';
+
+  @override
+  String get passwordStrengthMedium => 'متوسطة';
+
+  @override
+  String get passwordChangedSuccess => 'تم تغيير كلمة المرور بنجاح';
+
+  @override
+  String get confirmButton => 'تأكيد';
+
+  @override
+  String get adminModeWarning => '⚠️ وضع المسؤول: التغييرات مؤقتة.';
+
+  @override
+  String get passengers => 'الركاب';
+
+  @override
+  String get selectCount => 'حدد العدد';
+
+  @override
+  String get standardClass => 'قياسية';
+
+  @override
+  String get tickets => 'تذاكر';
 }

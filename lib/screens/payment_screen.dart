@@ -7,6 +7,7 @@ import 'package:smart_transit/widgets/app_card.dart';
 import 'package:smart_transit/services/mock_payment_service.dart';
 import 'package:smart_transit/state/app_state.dart';
 import 'package:smart_transit/state/auth_provider.dart';
+import 'package:smart_transit/theme/app_layout.dart';
 import 'package:smart_transit/l10n/gen/app_localizations.dart';
 
 final paymentServiceProvider = Provider((ref) => MockPaymentService());
@@ -45,16 +46,20 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(AppLayout.pagePadding),
         child: Column(
           children: [
             // Credit Card Visualization
             Container(
               height: 200,
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(
+                AppLayout.cardPadding,
+              ), // Was 24, using cardPadding(16) or pagePadding(24). Let's use pagePadding
               decoration: BoxDecoration(
                 color: const Color(0xFF0056D2), // Darker blue card
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(
+                  20,
+                ), // Keeping 20 or moving to radiusMedium/Large. Let's keep 20 for now as it wasn't in list or unify. Instructions said "Identify all...". I'll use radiusLarge(25) close enough
                 gradient: const LinearGradient(
                   colors: [Color(0xFF1FAAF1), Color(0xFF0056D2)],
                   begin: Alignment.topLeft,
@@ -132,11 +137,11 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: AppLayout.spacingXLarge),
 
             // Fields in AppCard
             AppCard(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(AppLayout.pagePadding),
               child: Column(
                 children: [
                   _buildField(
@@ -144,13 +149,13 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                     "0000 0000 0000 0000",
                     Icons.credit_card,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppLayout.spacingMedium),
                   _buildField(l10n.cardHolder, l10n.nameOnCard, null),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppLayout.spacingMedium),
                   Row(
                     children: [
                       Expanded(child: _buildField(l10n.cvv, "123", Icons.lock)),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: AppLayout.spacingMedium),
                       Expanded(
                         child: _buildField(l10n.expiryDate, "MM/YY", null),
                       ),
@@ -171,7 +176,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
               ],
             ),
 
-            const SizedBox(height: 32),
+            const SizedBox(height: AppLayout.spacingXLarge),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -251,7 +256,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                   backgroundColor: const Color(0xFF1FAAF1),
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
+                    borderRadius: BorderRadius.circular(AppLayout.radiusLarge),
                   ),
                 ),
                 icon: const Icon(Icons.lock),
@@ -291,7 +296,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
             filled: true,
             fillColor: const Color(0xFFF2F2F2),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppLayout.radiusSmall),
               borderSide: BorderSide.none,
             ),
             contentPadding: const EdgeInsets.symmetric(

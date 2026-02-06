@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:smart_transit/state/app_state.dart';
 import 'package:smart_transit/state/settings_provider.dart';
+import 'package:smart_transit/theme/app_layout.dart';
 import 'package:smart_transit/l10n/gen/app_localizations.dart';
 
 class BookingScreen extends ConsumerStatefulWidget {
@@ -75,10 +76,12 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                   child: Card(
                     elevation: 4,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(
+                        AppLayout.radiusMedium,
+                      ),
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(AppLayout.cardPadding),
                       child: Column(
                         children: [
                           _buildRouteRow(
@@ -88,7 +91,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                             ),
                             l10n.fromStation,
                           ),
-                          const Divider(height: 24),
+                          const Divider(height: AppLayout.spacingLarge),
                           _buildRouteRow(
                             Icons.location_on,
                             route.segments.last.to.getLocalizedName(isArabic),
@@ -105,10 +108,12 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
 
           // Bottom Sheet
           Container(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(AppLayout.pagePadding),
             decoration: const BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(AppLayout.radiusLarge),
+              ),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black12,
@@ -136,14 +141,14 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              "Passengers\nحدد العدد", // Could use l10n
-              style: TextStyle(fontWeight: FontWeight.bold),
+            Text(
+              "${l10n.passengers}\n${l10n.selectCount}", // "Passengers/Select Count"
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             Container(
               decoration: BoxDecoration(
                 color: const Color(0xFFF2F2F2),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(AppLayout.radiusSmall),
               ),
               child: Row(
                 children: [
@@ -201,7 +206,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
               backgroundColor: const Color(0xFF1FAAF1),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25),
+                borderRadius: BorderRadius.circular(AppLayout.radiusLarge),
               ),
             ),
             child: const Text(
@@ -221,22 +226,25 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text("Tickets", style: TextStyle(color: Colors.grey)),
+            Text(l10n.tickets, style: const TextStyle(color: Colors.grey)),
             Text(
               "x$_passengerCount",
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ],
         ),
-        const SizedBox(height: 12),
-        const Row(
+        const SizedBox(height: AppLayout.spacingMedium),
+        Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text("Class", style: TextStyle(color: Colors.grey)),
-            Text("Standard", style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text("Class", style: TextStyle(color: Colors.grey)),
+            Text(
+              l10n.standardClass,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
           ],
         ),
-        const Divider(height: 24),
+        const Divider(height: AppLayout.spacingLarge),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

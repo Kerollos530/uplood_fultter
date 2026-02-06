@@ -289,4 +289,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get downloadTicket => 'Download Ticket';
+
+  @override
+  String get resetPasswordHeader1 => 'Reset';
+
+  @override
+  String get resetPasswordHeader2 => 'Password';
+
+  @override
+  String get resetPasswordSubtitle =>
+      'Create a new strong and safe password to protect your account from unauthorized access.';
+
+  @override
+  String get newPassword => 'New Password';
+
+  @override
+  String get passwordStrengthMedium => 'Medium';
+
+  @override
+  String get passwordChangedSuccess => 'Password changed successfully';
+
+  @override
+  String get confirmButton => 'Confirm';
+
+  @override
+  String get adminModeWarning => '⚠️ Admin Mode: Changes are temporary.';
+
+  @override
+  String get passengers => 'Passengers';
+
+  @override
+  String get selectCount => 'Select Count';
+
+  @override
+  String get standardClass => 'Standard';
+
+  @override
+  String get tickets => 'Tickets';
 }

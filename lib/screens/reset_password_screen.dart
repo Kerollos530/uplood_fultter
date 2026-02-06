@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:smart_transit/theme/app_layout.dart';
+import 'package:smart_transit/l10n/gen/app_localizations.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   const ResetPasswordScreen({super.key});
@@ -17,6 +19,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -29,36 +32,39 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppLayout.pagePadding,
+          ),
           child: Column(
             children: [
-              const SizedBox(height: 20),
-              const Text(
-                'اعاده تعيين',
-                style: TextStyle(
+              const SizedBox(height: AppLayout.spacingLarge), // Was 20
+              Text(
+                l10n.resetPasswordHeader1,
+                style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                   height: 1.2,
                 ),
               ),
-              const Text(
-                'كلمه المرور',
-                style: TextStyle(
+              Text(
+                l10n.resetPasswordHeader2,
+                style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                   height: 1.2,
                 ),
               ),
-              const SizedBox(height: 12),
-              const Text(
-                'قم بانشاء كلمه مرور جديده قويه وامنه لحمايه حسابك من الوصول الغير مصرح به',
+              const SizedBox(
+                height: AppLayout.spacingSmall,
+              ), // Was 12, using Small(8)
+              Text(
+                l10n.resetPasswordSubtitle,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14, color: Colors.grey),
+                style: const TextStyle(fontSize: 14, color: Colors.grey),
               ),
-              const SizedBox(height: 32),
-
+              const SizedBox(height: AppLayout.spacingXLarge),
               // New Password Field
               const Align(
                 alignment: Alignment.centerRight,
@@ -67,7 +73,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppLayout.spacingSmall),
               TextField(
                 controller: _passCtrl,
                 obscureText: _obscurePass,
@@ -140,11 +146,11 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 ],
               ),
               const SizedBox(height: 5),
-              const Align(
+              Align(
                 alignment: Alignment.centerRight,
                 child: Text(
-                  "متوسطة",
-                  style: TextStyle(color: Colors.green, fontSize: 12),
+                  l10n.passwordStrengthMedium,
+                  style: const TextStyle(color: Colors.green, fontSize: 12),
                 ),
               ),
 
@@ -202,8 +208,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                             setState(() => _isLoading = false);
                             context.go('/login');
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('تم تغيير كلمة المرور بنجاح'),
+                              SnackBar(
+                                content: Text(l10n.passwordChangedSuccess),
                                 backgroundColor: Colors.green,
                               ),
                             );
@@ -213,15 +219,17 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     backgroundColor: const Color(0xFF1FAAF1),
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
+                      borderRadius: BorderRadius.circular(
+                        AppLayout.radiusLarge,
+                      ),
                     ),
                     elevation: 0,
                   ),
                   child: _isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text(
-                          'تأكيد',
-                          style: TextStyle(
+                      : Text(
+                          l10n.confirmButton,
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),

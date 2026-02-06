@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:smart_transit/models/station_model.dart';
 import 'package:smart_transit/state/app_state.dart';
 import 'package:smart_transit/state/settings_provider.dart';
+import 'package:smart_transit/theme/app_layout.dart';
 
 // import 'package:smart_transit/widgets/station_label.dart';
 
@@ -44,11 +45,11 @@ class RouteResultScreen extends ConsumerWidget {
         children: [
           // Info Header
           Container(
-            margin: const EdgeInsets.all(16),
-            padding: const EdgeInsets.all(16),
+            margin: const EdgeInsets.all(AppLayout.spacingMedium),
+            padding: const EdgeInsets.all(AppLayout.spacingMedium),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(AppLayout.radiusMedium),
               boxShadow: const [
                 BoxShadow(color: Colors.black12, blurRadius: 10),
               ],
@@ -73,7 +74,10 @@ class RouteResultScreen extends ConsumerWidget {
 
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppLayout.pagePadding,
+                vertical: AppLayout.spacingSmall,
+              ),
               itemCount:
                   route.segments.length + 1, // +1 for the end node visuals
               itemBuilder: (context, index) {
@@ -121,7 +125,7 @@ class RouteResultScreen extends ConsumerWidget {
           ),
 
           Padding(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(AppLayout.pagePadding),
             child: SizedBox(
               width: double.infinity,
               height: 50,
@@ -131,7 +135,7 @@ class RouteResultScreen extends ConsumerWidget {
                   backgroundColor: const Color(0xFF1FAAF1),
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
+                    borderRadius: BorderRadius.circular(AppLayout.radiusLarge),
                   ),
                 ),
                 child: Text(
