@@ -3,12 +3,14 @@ import 'package:smart_transit/models/route_model.dart';
 
 import 'package:smart_transit/models/ticket_and_landmark_models.dart';
 import 'package:smart_transit/services/routing_service.dart';
+import 'package:smart_transit/data/repositories/station_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 // ROUTING
 // ROUTING
 final routingServiceProvider = Provider((ref) => RoutingService());
+final stationRepositoryProvider = Provider((ref) => StationRepository());
 
 final routeLoadingProvider = StateProvider<bool>((ref) => false);
 final routeErrorProvider = StateProvider<String?>((ref) => null);

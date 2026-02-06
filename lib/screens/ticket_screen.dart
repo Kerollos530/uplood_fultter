@@ -3,18 +3,21 @@ import 'package:go_router/go_router.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:smart_transit/models/ticket_and_landmark_models.dart';
 import 'package:smart_transit/widgets/app_card.dart';
-import 'package:smart_transit/widgets/station_label.dart'; // Import reusable widget
-import 'package:smart_transit/data/mock_data/mock_data.dart'; // Import for station lookup
-import 'package:smart_transit/models/station_model.dart';
+import 'package:smart_transit/widgets/station_label.dart';
 import 'package:smart_transit/l10n/gen/app_localizations.dart';
+import 'package:smart_transit/theme/app_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:smart_transit/state/app_state.dart';
 
-class TicketScreen extends StatelessWidget {
+class TicketScreen extends ConsumerWidget {
   final TicketModel? ticketArg;
   const TicketScreen({super.key, this.ticketArg});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final stationRepo = ref.read(stationRepositoryProvider);
+
     // If ticketArg is null, we might need to get it from context.extra if GoRouter passed it.
     final TicketModel? ticket =
         ticketArg ?? GoRouterState.of(context).extra as TicketModel?;
@@ -26,39 +29,24 @@ class TicketScreen extends StatelessWidget {
       );
     }
 
-    // Lookup station details from ID to get proper Line info if needed
-    final sourceStation = allStations.firstWhere(
-      (s) => s.id == ticket.sourceStationId,
-      orElse: () => StationModel(
-        id: ticket.sourceStationId,
-        nameAr: ticket.sourceNameEn,
-        nameEn: ticket.sourceNameEn,
-        type: TransitType.metro,
-        latitude: 0,
-        longitude: 0,
-        lines: [
-          ticket.transportTypes.isNotEmpty
-              ? ticket.transportTypes.first
-              : 'Metro',
-        ],
-      ),
+    // Lookup stations using Repository
+    final sourceStation = stationRepo.getStationByIdWithFallback(
+      stationId: ticket.sourceStationId,
+      fallbackNameEn: ticket.sourceNameEn,
+      fallbackNameAr:
+          ticket.sourceNameEn, // Assuming same for fallback if missing
+      fallbackTransportType: ticket.transportTypes.isNotEmpty
+          ? ticket.transportTypes.first
+          : 'Metro',
     );
 
-    final destStation = allStations.firstWhere(
-      (s) => s.id == ticket.destinationStationId,
-      orElse: () => StationModel(
-        id: ticket.destinationStationId,
-        nameAr: ticket.destinationNameEn,
-        nameEn: ticket.destinationNameEn,
-        type: TransitType.metro,
-        latitude: 0,
-        longitude: 0,
-        lines: [
-          ticket.transportTypes.isNotEmpty
-              ? ticket.transportTypes.last
-              : 'Metro',
-        ],
-      ),
+    final destStation = stationRepo.getStationByIdWithFallback(
+      stationId: ticket.destinationStationId,
+      fallbackNameEn: ticket.destinationNameEn,
+      fallbackNameAr: ticket.destinationNameEn,
+      fallbackTransportType: ticket.transportTypes.isNotEmpty
+          ? ticket.transportTypes.last
+          : 'Metro',
     );
 
     return Scaffold(
@@ -71,12 +59,12 @@ class TicketScreen extends StatelessWidget {
               // Success Header
               const SizedBox(height: 20),
               Container(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color(0xFF1FAAF1),
+                  color: AppTheme.primaryBlue,
                   boxShadow: [
                     BoxShadow(
-                      color: Color(0x401FAAF1),
+                      color: AppTheme.primaryBlue.withValues(alpha: 0.25),
                       blurRadius: 20,
                       spreadRadius: 5,
                     ),
@@ -124,7 +112,7 @@ class TicketScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 32),
 
-                    // Date & Time (Mocked for UI polish as requested)
+                    // Date & Time
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -136,7 +124,7 @@ class TicketScreen extends StatelessWidget {
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                             Text(
-                              'Today, ${DateTime.now().toString().substring(0, 10)}',
+                              ticket.timestamp.toString().substring(0, 10),
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -150,9 +138,11 @@ class TicketScreen extends StatelessWidget {
                               l10n.time,
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
-                            const Text(
-                              '14:30 PM', // Mock time
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                            Text(
+                              '${ticket.timestamp.hour}:${ticket.timestamp.minute.toString().padLeft(2, '0')}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ],
                         ),
@@ -212,7 +202,7 @@ class TicketScreen extends StatelessWidget {
                   icon: const Icon(Icons.download),
                   label: Text(l10n.downloadTicket),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1FAAF1),
+                    backgroundColor: AppTheme.primaryBlue,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
@@ -229,7 +219,7 @@ class TicketScreen extends StatelessWidget {
                 child: OutlinedButton(
                   onPressed: () => context.go('/planner'),
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Color(0xFF1FAAF1)),
+                    side: const BorderSide(color: AppTheme.primaryBlue),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
                     ),
@@ -239,7 +229,7 @@ class TicketScreen extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1FAAF1),
+                      color: AppTheme.primaryBlue,
                     ),
                   ),
                 ),

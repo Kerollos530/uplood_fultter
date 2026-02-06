@@ -110,7 +110,7 @@ class ManageStationsScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<TransitType>(
-                      value: selectedType,
+                      initialValue: selectedType,
                       decoration: const InputDecoration(
                         labelText: 'Transport Type',
                       ),

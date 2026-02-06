@@ -229,9 +229,9 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
           ],
         ),
         const SizedBox(height: 12),
-        Row(
+        const Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: const [
+          children: [
             Text("Class", style: TextStyle(color: Colors.grey)),
             Text("Standard", style: TextStyle(fontWeight: FontWeight.bold)),
           ],

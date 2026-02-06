@@ -198,7 +198,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                           setState(() => _isLoading = true);
                           // Simulate API call
                           await Future.delayed(const Duration(seconds: 2));
-                          if (mounted) {
+                          if (context.mounted) {
                             setState(() => _isLoading = false);
                             context.go('/login');
                             ScaffoldMessenger.of(context).showSnackBar(

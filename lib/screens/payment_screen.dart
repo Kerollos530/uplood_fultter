@@ -65,9 +65,9 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
+                  const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
+                    children: [
                       Icon(
                         FontAwesomeIcons.simCard,
                         color: Colors.amber,
@@ -98,7 +98,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                               fontSize: 10,
                             ),
                           ),
-                          Text(
+                          const Text(
                             "12/25",
                             style: TextStyle(
                               color: Colors.white,
@@ -228,11 +228,11 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                               .read(historyProvider.notifier)
                               .addTicket(ticket);
 
-                          if (mounted) {
+                          if (context.mounted) {
                             context.go('/ticket', extra: ticket);
                           }
                         } catch (e) {
-                          if (mounted) {
+                          if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(

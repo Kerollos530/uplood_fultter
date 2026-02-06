@@ -243,9 +243,9 @@ class RouteResultScreen extends ConsumerWidget {
                       color: Colors.orange[100],
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: Row(
+                    child: const Row(
                       mainAxisSize: MainAxisSize.min,
-                      children: const [
+                      children: [
                         Icon(Icons.swap_calls, size: 12, color: Colors.orange),
                         SizedBox(width: 4),
                         Text(
