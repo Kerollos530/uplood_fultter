@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_transit/models/user_model.dart';
-import 'package:smart_transit/services/mock_auth_service.dart';
+
 import 'package:smart_transit/models/failure.dart';
+import 'package:smart_transit/data/datasources/auth_remote_source.dart';
 
 final authServiceProvider = Provider(
   (ref) => AuthRemoteDataSource(),
