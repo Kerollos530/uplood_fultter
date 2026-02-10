@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:smart_transit/models/ticket_and_landmark_models.dart';
 import 'package:smart_transit/state/auth_provider.dart';
 import 'package:smart_transit/screens/login_screen.dart';
 import 'package:smart_transit/screens/signup_screen.dart';
@@ -101,7 +102,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/ticket',
-        builder: (context, state) => const TicketScreen(),
+        builder: (context, state) =>
+            TicketScreen(ticketArg: state.extra as TicketModel?),
       ),
       GoRoute(
         path: '/admin',

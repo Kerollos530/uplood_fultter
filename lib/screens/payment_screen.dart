@@ -199,19 +199,21 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                 onPressed: isLoading || route == null
                     ? null
                     : () async {
+                        // 1. Set Loading State
                         ref.read(paymentLoadingProvider.notifier).state = true;
+
                         try {
-                          // Mock Process Payment
+                          // 2. Process Payment
                           await ref
                               .read(paymentServiceProvider)
                               .processPayment(
                                 route.totalCost,
-                                "4242424242424242", // Mock card
+                                "4242424242424242",
                                 "12/25",
                                 "123",
                               );
 
-                          // Create Ticket
+                          // 3. Create Ticket Object
                           final ticket = TicketModel(
                             ticketId: DateTime.now().millisecondsSinceEpoch
                                 .toString(),
@@ -228,15 +230,21 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                                 .toList(),
                           );
 
-                          // Check history loading? It's handled inside addTicket via side-car
+                          // 4. Save Ticket (History)
                           await ref
                               .read(historyProvider.notifier)
                               .addTicket(ticket);
 
+                          // 5. Navigate Success
                           if (context.mounted) {
+                            // Stop loading before navigation to avoid "setState after dispose" if possible,
+                            // though GoRouter handles it well.
+                            // But since we are in a finally block for loading = false,
+                            // we should just navigate.
                             context.go('/ticket', extra: ticket);
                           }
                         } catch (e) {
+                          // 6. Handle Error
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
@@ -248,6 +256,12 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                             );
                           }
                         } finally {
+                          // 7. Reset Loading State
+                          // Check if mounted to avoid setting state on unmounted widget
+                          // (e.g. if navigation happened successfully and replaced this widget)
+                          // However, since we use Riverpod provider for loading state,
+                          // it is safe to update it even if this widget is disposed,
+                          // assuming the provider itself isn't scoped to this widget (it's global/app-level).
                           ref.read(paymentLoadingProvider.notifier).state =
                               false;
                         }
