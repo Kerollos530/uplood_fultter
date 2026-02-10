@@ -9,6 +9,8 @@ import 'package:smart_transit/theme/app_layout.dart';
 // import 'package:smart_transit/widgets/station_label.dart';
 
 import 'package:smart_transit/l10n/gen/app_localizations.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart' as lat_lng;
 
 class RouteResultScreen extends ConsumerWidget {
   const RouteResultScreen({super.key});
@@ -43,6 +45,87 @@ class RouteResultScreen extends ConsumerWidget {
       ),
       body: Column(
         children: [
+          // Route Map
+          SizedBox(
+            height: 200,
+            child: FlutterMap(
+              options: MapOptions(
+                initialCenter: lat_lng.LatLng(
+                  route.segments.first.from.latitude,
+                  route.segments.first.from.longitude,
+                ),
+                initialZoom: 13.0,
+                initialCameraFit: CameraFit.bounds(
+                  bounds: LatLngBounds.fromPoints([
+                    lat_lng.LatLng(
+                      route.segments.first.from.latitude,
+                      route.segments.first.from.longitude,
+                    ),
+                    lat_lng.LatLng(
+                      route.segments.last.to.latitude,
+                      route.segments.last.to.longitude,
+                    ),
+                  ]),
+                  padding: const EdgeInsets.all(40),
+                ),
+              ),
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.example.smart_transit',
+                ),
+                PolylineLayer(
+                  polylines: [
+                    Polyline(
+                      points: [
+                        lat_lng.LatLng(
+                          route.segments.first.from.latitude,
+                          route.segments.first.from.longitude,
+                        ),
+                        lat_lng.LatLng(
+                          route.segments.last.to.latitude,
+                          route.segments.last.to.longitude,
+                        ),
+                      ],
+                      color: Colors.blue,
+                      strokeWidth: 4.0,
+                      isDotted: true,
+                    ),
+                  ],
+                ),
+                MarkerLayer(
+                  markers: [
+                    Marker(
+                      point: lat_lng.LatLng(
+                        route.segments.first.from.latitude,
+                        route.segments.first.from.longitude,
+                      ),
+                      width: 40,
+                      height: 40,
+                      child: const Icon(
+                        Icons.location_on,
+                        color: Colors.green,
+                        size: 40,
+                      ),
+                    ),
+                    Marker(
+                      point: lat_lng.LatLng(
+                        route.segments.last.to.latitude,
+                        route.segments.last.to.longitude,
+                      ),
+                      width: 40,
+                      height: 40,
+                      child: const Icon(
+                        Icons.location_on,
+                        color: Colors.red,
+                        size: 40,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
           // Info Header
           Container(
             margin: const EdgeInsets.all(AppLayout.spacingMedium),

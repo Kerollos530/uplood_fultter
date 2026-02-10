@@ -5,6 +5,8 @@ import 'package:smart_transit/state/app_state.dart';
 import 'package:smart_transit/state/settings_provider.dart';
 import 'package:smart_transit/theme/app_layout.dart';
 import 'package:smart_transit/l10n/gen/app_localizations.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart' as lat_lng;
 
 class BookingScreen extends ConsumerStatefulWidget {
   const BookingScreen({super.key});
@@ -63,11 +65,86 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
             child: Stack(
               children: [
                 // Clean Map Placeholder
-                Container(
-                  color: Colors.blue[50],
-                  child: Center(
-                    child: Icon(Icons.map, size: 100, color: Colors.blue[100]),
+                // Route Map
+                FlutterMap(
+                  options: MapOptions(
+                    initialCenter: lat_lng.LatLng(
+                      route.segments.last.to.latitude,
+                      route.segments.last.to.longitude,
+                    ),
+                    initialZoom: 13.0,
+                    initialCameraFit: CameraFit.bounds(
+                      bounds: LatLngBounds.fromPoints([
+                        lat_lng.LatLng(
+                          route.segments.first.from.latitude,
+                          route.segments.first.from.longitude,
+                        ),
+                        lat_lng.LatLng(
+                          route.segments.last.to.latitude,
+                          route.segments.last.to.longitude,
+                        ),
+                      ]),
+                      padding: const EdgeInsets.all(50),
+                    ),
                   ),
+                  children: [
+                    TileLayer(
+                      urlTemplate:
+                          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                      userAgentPackageName: 'com.example.smart_transit',
+                    ),
+                    PolylineLayer(
+                      polylines: [
+                        Polyline(
+                          points: [
+                            lat_lng.LatLng(
+                              route.segments.first.from.latitude,
+                              route.segments.first.from.longitude,
+                            ),
+                            lat_lng.LatLng(
+                              route.segments.last.to.latitude,
+                              route.segments.last.to.longitude,
+                            ),
+                          ],
+                          color: Colors.blue,
+                          strokeWidth: 4.0,
+                          isDotted: true,
+                        ),
+                      ],
+                    ),
+                    MarkerLayer(
+                      markers: [
+                        // Start Station
+                        Marker(
+                          point: lat_lng.LatLng(
+                            route.segments.first.from.latitude,
+                            route.segments.first.from.longitude,
+                          ),
+                          width: 40,
+                          height: 40,
+                          child: const Icon(
+                            Icons.location_on,
+                            color: Colors.green, // Start is Green
+                            size: 40,
+                          ),
+                        ),
+                        // End Station
+                        Marker(
+                          point: lat_lng.LatLng(
+                            route.segments.last.to.latitude,
+                            route.segments.last.to.longitude,
+                          ),
+                          width: 40,
+                          height: 40,
+                          child: const Icon(
+                            Icons.location_on,
+                            color: Colors.red, // End is Red
+                            size: 40,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
                 Positioned(
                   top: 20,
