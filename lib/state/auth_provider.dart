@@ -1,18 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_transit/models/user_model.dart';
-
 import 'package:smart_transit/models/failure.dart';
-import 'package:smart_transit/data/datasources/auth_remote_source.dart';
+import 'package:smart_transit/services/mock_auth_service.dart';
 
-final authServiceProvider = Provider(
-  (ref) => AuthRemoteDataSource(),
-); // Changed from MockAuthService
+final authServiceProvider = Provider((ref) => MockAuthService());
 
 final authLoadingProvider = StateProvider<bool>((ref) => false);
 final authErrorProvider = StateProvider<Failure?>((ref) => null);
 
 class AuthState extends StateNotifier<UserModel?> {
-  final AuthRemoteDataSource _authService; // Changed type
+  final MockAuthService _authService;
   final Ref _ref;
 
   AuthState(this._authService, this._ref) : super(null) {
@@ -21,8 +18,7 @@ class AuthState extends StateNotifier<UserModel?> {
 
   Future<void> _checkSession() async {
     try {
-      final user = await _authService
-          .getProfile(); // Changed from getCurrentUser (mock)
+      final user = await _authService.getCurrentUser();
       state = user;
     } catch (_) {
       // Session restoration failure is silent usually
@@ -56,8 +52,7 @@ class AuthState extends StateNotifier<UserModel?> {
   Future<void> logout() async {
     try {
       _ref.read(authLoadingProvider.notifier).state = true;
-      // await _authService.logout(); // Remote source might not have logout if stateless JWT, or delete token locally
-      // For now we just clear state. Ideally we delete token from storage.
+      await _authService.logout();
       state = null;
     } finally {
       _ref.read(authLoadingProvider.notifier).state = false;

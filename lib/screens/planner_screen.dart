@@ -7,6 +7,9 @@ import 'package:smart_transit/models/station_model.dart';
 import 'package:smart_transit/state/app_state.dart';
 import 'package:smart_transit/state/settings_provider.dart';
 import 'package:smart_transit/l10n/gen/app_localizations.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart' as lat_lng;
+import 'package:geolocator/geolocator.dart';
 
 class PlannerScreen extends ConsumerStatefulWidget {
   const PlannerScreen({super.key});
@@ -18,6 +21,13 @@ class PlannerScreen extends ConsumerStatefulWidget {
 class _PlannerScreenState extends ConsumerState<PlannerScreen> {
   StationModel? _startStation;
   StationModel? _endStation;
+  bool _isGettingLocation = false;
+  final MapController _mapController = MapController();
+  lat_lng.LatLng _currentCenter = const lat_lng.LatLng(
+    30.0444,
+    31.2357,
+  ); // Cairo default
+  lat_lng.LatLng? _userLocation;
 
   @override
   void initState() {
@@ -63,6 +73,102 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
     }
   }
 
+  Future<void> _getCurrentLocation() async {
+    setState(() => _isGettingLocation = true);
+
+    LocationPermission permission;
+
+    // Test if location services are enabled.
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Location services are disabled.')),
+        );
+        setState(() => _isGettingLocation = false);
+      }
+      return;
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Location permissions are denied')),
+          );
+          setState(() => _isGettingLocation = false);
+        }
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Location permissions are permanently denied, we cannot request permissions.',
+            ),
+          ),
+        );
+        setState(() => _isGettingLocation = false);
+      }
+      return;
+    }
+
+    try {
+      final position = await Geolocator.getCurrentPosition();
+      final userLat = position.latitude;
+      final userLng = position.longitude;
+
+      // Find nearest station
+      StationModel? nearest;
+      double minDistance = double.infinity;
+
+      for (final station in allStations) {
+        final dist = Geolocator.distanceBetween(
+          userLat,
+          userLng,
+          station.latitude,
+          station.longitude,
+        );
+        if (dist < minDistance) {
+          minDistance = dist;
+          nearest = station;
+        }
+      }
+
+      setState(() {
+        _userLocation = lat_lng.LatLng(userLat, userLng);
+        _currentCenter = _userLocation!;
+        if (nearest != null) {
+          _startStation = nearest;
+        }
+        _mapController.move(_currentCenter, 13.0);
+        _isGettingLocation = false;
+      });
+
+      if (mounted && nearest != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Location found: Nearest station is ${nearest.nameEn}',
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error finding location: $e')));
+        setState(() => _isGettingLocation = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isArabic = ref.watch(isArabicProvider);
@@ -81,21 +187,37 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
       body: Stack(
         children: [
           // Background Map (Placeholder Image or Container)
+          // Background Map with Flutter Map
           Container(
             color: Colors.grey[300],
             width: double.infinity,
             height: double.infinity,
-            child: Stack(
-              fit: StackFit.expand,
+            child: FlutterMap(
+              mapController: _mapController,
+              options: MapOptions(
+                initialCenter: _currentCenter,
+                initialZoom: 13.0,
+              ),
               children: [
-                // In a real app complexity, use Google Maps here
-                Image.asset(
-                  'assets/images/map_bg.jpg',
-                  fit: BoxFit.cover,
-                  errorBuilder: (c, e, s) => const Center(
-                    child: Icon(Icons.map, size: 100, color: Colors.grey),
-                  ),
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.example.smart_transit',
                 ),
+                if (_userLocation != null)
+                  MarkerLayer(
+                    markers: [
+                      Marker(
+                        point: _userLocation!,
+                        width: 40,
+                        height: 40,
+                        child: const Icon(
+                          Icons.location_on,
+                          color: Colors.red,
+                          size: 40,
+                        ),
+                      ),
+                    ],
+                  ),
               ],
             ),
           ),
@@ -251,11 +373,14 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Identify current location logic would go here
-        },
+        onPressed: _isGettingLocation ? null : _getCurrentLocation,
         backgroundColor: Colors.white,
-        child: const Icon(Icons.my_location, color: Color(0xFF1FAAF1)),
+        child: _isGettingLocation
+            ? const Padding(
+                padding: EdgeInsets.all(12.0),
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Icon(Icons.my_location, color: Color(0xFF1FAAF1)),
       ),
     );
   }
