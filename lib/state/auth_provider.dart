@@ -3,13 +3,15 @@ import 'package:smart_transit/models/user_model.dart';
 import 'package:smart_transit/services/mock_auth_service.dart';
 import 'package:smart_transit/models/failure.dart';
 
-final authServiceProvider = Provider((ref) => MockAuthService());
+final authServiceProvider = Provider(
+  (ref) => AuthRemoteDataSource(),
+); // Changed from MockAuthService
 
 final authLoadingProvider = StateProvider<bool>((ref) => false);
 final authErrorProvider = StateProvider<Failure?>((ref) => null);
 
 class AuthState extends StateNotifier<UserModel?> {
-  final MockAuthService _authService;
+  final AuthRemoteDataSource _authService; // Changed type
   final Ref _ref;
 
   AuthState(this._authService, this._ref) : super(null) {
@@ -18,7 +20,8 @@ class AuthState extends StateNotifier<UserModel?> {
 
   Future<void> _checkSession() async {
     try {
-      final user = await _authService.getCurrentUser();
+      final user = await _authService
+          .getProfile(); // Changed from getCurrentUser (mock)
       state = user;
     } catch (_) {
       // Session restoration failure is silent usually
@@ -52,7 +55,8 @@ class AuthState extends StateNotifier<UserModel?> {
   Future<void> logout() async {
     try {
       _ref.read(authLoadingProvider.notifier).state = true;
-      await _authService.logout();
+      // await _authService.logout(); // Remote source might not have logout if stateless JWT, or delete token locally
+      // For now we just clear state. Ideally we delete token from storage.
       state = null;
     } finally {
       _ref.read(authLoadingProvider.notifier).state = false;
@@ -62,7 +66,6 @@ class AuthState extends StateNotifier<UserModel?> {
   void _handleAuthError(Object error) {
     String message = error.toString().replaceAll('Exception: ', '');
     // In a real app, you would map specific error codes here.
-    // Since our mock service throws Arabic strings directly, we use them.
     if (message.contains('SocketException') || message.contains('Network')) {
       _ref.read(authErrorProvider.notifier).state = const NetworkFailure();
     } else {

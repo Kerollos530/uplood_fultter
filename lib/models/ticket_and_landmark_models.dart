@@ -39,16 +39,18 @@ class TicketModel {
 
   factory TicketModel.fromJson(Map<String, dynamic> json) {
     return TicketModel(
-      ticketId: json['ticketId'],
-      userId: json['userId'],
-      sourceStationId: json['sourceStationId'],
-      destinationStationId: json['destinationStationId'],
-      sourceNameEn: json['sourceNameEn'],
-      destinationNameEn: json['destinationNameEn'],
+      ticketId: json['ticketId'] ?? json['ticket_id'],
+      userId: json['userId'] ?? json['user_id'],
+      sourceStationId: json['sourceStationId'] ?? json['source_station_id'],
+      destinationStationId:
+          json['destinationStationId'] ?? json['destination_station_id'],
+      sourceNameEn: json['sourceNameEn'] ?? json['source_name_en'],
+      destinationNameEn:
+          json['destinationNameEn'] ?? json['destination_name_en'],
       price: (json['price'] as num).toDouble(),
       timestamp: DateTime.parse(json['timestamp']),
       transportTypes:
-          (json['transportTypes'] as List<dynamic>?)
+          (json['transportTypes'] ?? json['transport_types'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           ['Metro'],

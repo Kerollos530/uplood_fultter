@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:smart_transit/core/api/api_client.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_transit/router.dart';
 import 'package:smart_transit/theme/app_theme.dart';
@@ -7,7 +9,11 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'package:smart_transit/l10n/gen/app_localizations.dart';
 
-void main() {
+Future<void> main() async {
+  await dotenv.load(fileName: ".env");
+  final baseUrl = dotenv.get('BASE_URL', fallback: 'http://localhost:8000');
+  ApiClient().setBaseUrl(baseUrl);
+
   runApp(const ProviderScope(child: SmartTransitApp()));
 }
 
