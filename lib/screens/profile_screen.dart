@@ -124,15 +124,13 @@ class ProfileScreen extends ConsumerWidget {
             const SizedBox(height: 32),
 
             // --- Activity Section ---
-            _buildSectionTitle(
-              l10n.myActivity ?? "My Activity",
-            ), // Fallback if key missing
+            _buildSectionTitle(l10n.myActivity), // "نشاطي"
             const SizedBox(height: 16),
             _buildSettingsContainer(
               child: ListTile(
                 leading: const Icon(Icons.history, color: Color(0xFF1FAAF1)),
                 title: Text(
-                  l10n.tripHistory ?? "Trip History",
+                  l10n.tripHistory,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 trailing: const Icon(
@@ -147,7 +145,7 @@ class ProfileScreen extends ConsumerWidget {
             const SizedBox(height: 32),
 
             // --- Settings Section ---
-            _buildSectionTitle(l10n.actions ?? "Settings"), // "الإعدادات"
+            _buildSectionTitle(l10n.actions), // "الإعدادات"
             const SizedBox(height: 16),
 
             // Dark Mode

@@ -2,13 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:smart_transit/models/ticket_and_landmark_models.dart';
-import 'package:smart_transit/widgets/app_card.dart';
-import 'package:smart_transit/widgets/station_label.dart';
 import 'package:smart_transit/l10n/gen/app_localizations.dart';
 import 'package:smart_transit/theme/app_theme.dart';
-import 'package:smart_transit/theme/app_layout.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:smart_transit/state/app_state.dart';
 
 class TicketScreen extends ConsumerStatefulWidget {
   final Object? ticketArg;
@@ -347,9 +343,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
 
           // Valid One Time Label
           Text(
-            // Try to use l10n key, fallback if not generated
-            tryGetL10nStr(l10n, 'validForOneTimeUse') ??
-                "Valid for one-time use",
+            l10n.validForOneTimeUse,
             style: TextStyle(
               color: Colors.white.withOpacity(0.7),
               fontSize: 12,
@@ -362,7 +356,7 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
 
           // Order ID
           Text(
-            tryGetL10nStr(l10n, 'orderId') ?? "ORDER ID",
+            l10n.orderId,
             style: TextStyle(
               color: Colors.white.withOpacity(0.5),
               fontSize: 12,
