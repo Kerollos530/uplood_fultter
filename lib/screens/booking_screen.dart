@@ -345,7 +345,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
           height: 50,
           child: ElevatedButton(
             onPressed: () {
-              context.push('/payment');
+              context.push('/payment', extra: _passengerCount);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF1FAAF1),

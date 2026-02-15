@@ -8,6 +8,8 @@ class TicketModel {
   final double price;
   final DateTime timestamp;
   final List<String> transportTypes;
+  final int passengerIndex; // 1-based index (e.g. 1 for "Ticket 1 of 3")
+  final int totalPassengers; // Total tickets in this batch (e.g. 3)
 
   TicketModel({
     required this.ticketId,
@@ -18,9 +20,9 @@ class TicketModel {
     required this.destinationNameEn,
     required this.price,
     required this.timestamp,
-    this.transportTypes = const [
-      'Metro',
-    ], // Default to Metro for backward compatibility
+    this.transportTypes = const ['Metro'],
+    this.passengerIndex = 1,
+    this.totalPassengers = 1,
   });
 
   Map<String, dynamic> toJson() {
@@ -34,6 +36,8 @@ class TicketModel {
       'price': price,
       'timestamp': timestamp.toIso8601String(),
       'transportTypes': transportTypes,
+      'passengerIndex': passengerIndex,
+      'totalPassengers': totalPassengers,
     };
   }
 
@@ -54,11 +58,13 @@ class TicketModel {
               ?.map((e) => e.toString())
               .toList() ??
           ['Metro'],
+      passengerIndex: json['passengerIndex'] ?? 1,
+      totalPassengers: json['totalPassengers'] ?? 1,
     );
   }
 
   String get qrString =>
-      "SMART_TRANSIT|$ticketId|$userId|${timestamp.toIso8601String()}";
+      "SMART_TRANSIT|$ticketId|$userId|${timestamp.toIso8601String()}|$passengerIndex|$totalPassengers";
 }
 
 class LandmarkModel {

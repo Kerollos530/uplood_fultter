@@ -102,8 +102,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/ticket',
-        builder: (context, state) =>
-            TicketScreen(ticketArg: state.extra as TicketModel?),
+        builder: (context, state) => TicketScreen(ticketArg: state.extra),
       ),
       GoRoute(
         path: '/admin',

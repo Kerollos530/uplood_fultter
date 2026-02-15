@@ -45,14 +45,17 @@ class HistoryNotifier extends StateNotifier<List<TicketModel>> {
   }
 
   Future<void> addTicket(TicketModel ticket) async {
+    await addTickets([ticket]);
+  }
+
+  Future<void> addTickets(List<TicketModel> tickets) async {
     _ref.read(historyLoadingProvider.notifier).state = true;
     try {
-      await _repository.saveTicket(ticket);
+      await _repository.saveTickets(tickets);
       // OPTIMISTIC UPDATE: Update UI state immediately after successful save
-      // Alternatively, re-fetch from repo to ensure sync
-      state = [...state, ticket];
+      state = [...state, ...tickets];
     } catch (e) {
-      _ref.read(historyErrorProvider.notifier).state = "Failed to save ticket";
+      _ref.read(historyErrorProvider.notifier).state = "Failed to save tickets";
     } finally {
       _ref.read(historyLoadingProvider.notifier).state = false;
     }

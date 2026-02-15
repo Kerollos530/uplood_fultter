@@ -733,6 +733,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tickets'**
   String get tickets;
+
+  /// No description provided for @validForOneTimeUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid for one-time use'**
+  String get validForOneTimeUse;
+
+  /// No description provided for @orderId.
+  ///
+  /// In en, this message translates to:
+  /// **'ORDER ID'**
+  String get orderId;
+
+  /// No description provided for @generatedTickets.
+  ///
+  /// In en, this message translates to:
+  /// **'Generated Tickets'**
+  String get generatedTickets;
+
+  /// No description provided for @myActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'My Activity'**
+  String get myActivity;
+
+  /// No description provided for @tripHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip History'**
+  String get tripHistory;
 }
 
 class _AppLocalizationsDelegate

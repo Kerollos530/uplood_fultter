@@ -104,5 +104,10 @@
   "passengers": "Passengers",
   "selectCount": "Select Count",
   "standardClass": "Standard",
-  "tickets": "Tickets"
+  "tickets": "Tickets",
+  "validForOneTimeUse": "Valid for one-time use",
+  "orderId": "ORDER ID",
+  "generatedTickets": "Generated Tickets",
+  "myActivity": "My Activity",
+  "tripHistory": "Trip History"
 }

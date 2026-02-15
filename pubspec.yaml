@@ -28,6 +28,7 @@ dependencies:
   flutter_dotenv: ^6.0.0
   flutter_secure_storage: ^10.0.0
   json_annotation: ^4.10.0
+  geocoding: ^4.0.0
 
 dev_dependencies:
   flutter_test:

@@ -326,4 +326,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tickets => 'Tickets';
+
+  @override
+  String get validForOneTimeUse => 'Valid for one-time use';
+
+  @override
+  String get orderId => 'ORDER ID';
+
+  @override
+  String get generatedTickets => 'Generated Tickets';
+
+  @override
+  String get myActivity => 'My Activity';
+
+  @override
+  String get tripHistory => 'Trip History';
 }

@@ -104,5 +104,10 @@
   "passengers": "الركاب",
   "selectCount": "حدد العدد",
   "standardClass": "قياسية",
-  "tickets": "تذاكر"
+  "tickets": "تذاكر",
+  "validForOneTimeUse": "صالح للاستخدام مرة واحدة",
+  "orderId": "رقم الطلب",
+  "generatedTickets": "التذاكر المصدرة",
+  "myActivity": "نشاطي",
+  "tripHistory": "سجل الرحلات"
 }

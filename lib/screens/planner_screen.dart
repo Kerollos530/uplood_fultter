@@ -10,6 +10,8 @@ import 'package:smart_transit/l10n/gen/app_localizations.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' as lat_lng;
 import 'package:geolocator/geolocator.dart';
+import 'package:smart_transit/services/geocoding_service.dart';
+import 'package:smart_transit/services/station_locator_service.dart';
 
 class PlannerScreen extends ConsumerStatefulWidget {
   const PlannerScreen({super.key});
@@ -21,7 +23,11 @@ class PlannerScreen extends ConsumerStatefulWidget {
 class _PlannerScreenState extends ConsumerState<PlannerScreen> {
   StationModel? _startStation;
   StationModel? _endStation;
+  final TextEditingController _destinationController = TextEditingController();
   bool _isGettingLocation = false;
+  bool _isResolvingStation = false;
+  String? _resolvedStationInfo; // e.g., "Nearest: Opera (210m)"
+
   final MapController _mapController = MapController();
   lat_lng.LatLng _currentCenter = const lat_lng.LatLng(
     30.0444,
@@ -39,14 +45,193 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
     );
   }
 
+  @override
+  void dispose() {
+    _destinationController.dispose();
+    super.dispose();
+  }
+
+  Future<lat_lng.LatLng?> _smartGeocode(String query, String userLocale) async {
+    final geocodingService = ref.read(geocodingServiceProvider);
+
+    // Helper to try geocoding and log result
+    Future<lat_lng.LatLng?> tryGeocode(String q, String l) async {
+      debugPrint('Trying geocode: "$q" (locale: $l)');
+      try {
+        return await geocodingService.getCoordinatesFromAddress(q, locale: l);
+      } catch (e) {
+        debugPrint('Geocode failed for "$q" ($l): $e');
+        return null;
+      }
+    }
+
+    // 1. Try exact query with user locale
+    var result = await tryGeocode(query, userLocale);
+    if (result != null) return result;
+
+    // 2. Try with Country Context
+    // Check if query already has Egypt/مصر to avoid duplication
+    final lowerQuery = query.toLowerCase();
+    final hasEgypt = lowerQuery.contains('egypt') || lowerQuery.contains('مصر');
+
+    if (!hasEgypt) {
+      final suffix = userLocale == 'ar_EG' ? '، مصر' : ', Egypt';
+      result = await tryGeocode('$query$suffix', userLocale);
+      if (result != null) {
+        debugPrint('Smart Geocode: Found with country context.');
+        return result;
+      }
+    }
+
+    // 3. Try Swapped Locale (e.g. user typed English but app is Arabic)
+    final swappedLocale = userLocale == 'ar_EG' ? 'en_US' : 'ar_EG';
+    result = await tryGeocode(query, swappedLocale);
+    if (result != null) {
+      debugPrint('Smart Geocode: Found with swapped locale ($swappedLocale).');
+      return result;
+    }
+
+    // 4. Try Swapped Locale + Country Context
+    if (!hasEgypt) {
+      final suffix = swappedLocale == 'ar_EG' ? '، مصر' : ', Egypt';
+      result = await tryGeocode('$query$suffix', swappedLocale);
+      if (result != null) {
+        debugPrint('Smart Geocode: Found with swapped locale + context.');
+        return result;
+      }
+    }
+
+    return null;
+  }
+
+  Future<void> _resolveDestination() async {
+    final query = _destinationController.text.trim();
+    if (query.isEmpty) {
+      setState(() {
+        _resolvedStationInfo = null;
+        _endStation = null;
+      });
+      return;
+    }
+
+    setState(() {
+      _isResolvingStation = true;
+      _resolvedStationInfo = null;
+      _endStation = null;
+    });
+
+    try {
+      // 1. Determine Locale
+      final isArabic = ref.read(isArabicProvider);
+      final locale = isArabic ? 'ar_EG' : 'en_US';
+
+      debugPrint('Resolving destination: "$query" (Strategy: Smart Retry)');
+
+      // 2. Geocode with Smart Retry
+      final coords = await _smartGeocode(query, locale);
+
+      if (coords == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Could not find location coordinates.'),
+            ),
+          );
+        }
+        return;
+      }
+
+      // 3. Find Nearest Station
+      // Allowed types: Metro, Monorail, LRT, BRT
+      final result = await ref
+          .read(stationLocatorServiceProvider)
+          .findNearestStation(
+            target: coords,
+            allowedTypes: [
+              TransitType.metro,
+              TransitType.monorail,
+              TransitType.lrt,
+              TransitType.brt,
+            ],
+            radiusKm: 5.0, // 5km radius
+          );
+
+      final bestStation = result.bestWithinRadius;
+      final fallbackStation = result.absoluteNearest;
+      final distKm = result.distanceToNearestMeters / 1000.0;
+
+      if (bestStation != null) {
+        // Option A: Station within 5km found
+        setState(() {
+          _endStation = bestStation;
+          _resolvedStationInfo =
+              'Nearest: ${bestStation.nameEn} (${distKm.toStringAsFixed(1)}km)';
+        });
+      } else if (fallbackStation != null) {
+        // Option B: Fallback (No station within 5km)
+        setState(() {
+          _endStation = fallbackStation;
+          // Warning style text usually handled in UI builder, but here we set the string
+          _resolvedStationInfo =
+              '⚠️ No station nearby. Closest: ${fallbackStation.nameEn} (${distKm.toStringAsFixed(1)}km)';
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Destination is far (${distKm.toStringAsFixed(1)}km). We selected the closest station.',
+              ),
+              duration: const Duration(seconds: 4),
+              action: SnackBarAction(
+                label: 'OK',
+                onPressed: () {},
+                textColor: Colors.yellow,
+              ),
+            ),
+          );
+        }
+      } else {
+        // Option C: No stations at all (Empty database?)
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('No stations found.')));
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error resolving destination: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isResolvingStation = false);
+      }
+    }
+  }
+
   void _findRoute() async {
     if (_startStation == null) return;
+
+    // Auto-resolve if user typed something but didn't click resolve/search yet
+    if (_endStation == null && _destinationController.text.isNotEmpty) {
+      await _resolveDestination();
+      // If still null after resolve attempt
+      if (_endStation == null) return;
+    }
+
     if (_endStation == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context)!.pleaseSelectDestination),
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.pleaseSelectDestination,
+            ),
+          ),
+        );
+      }
       return;
     }
 
@@ -306,33 +491,64 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                         const SizedBox(height: 16),
 
                         // To Field
-                        DropdownButtonFormField<StationModel>(
-                          initialValue: _endStation,
-                          decoration: InputDecoration(
-                            labelText: l10n.to,
-                            labelStyle: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ),
-                            filled: true,
-                            fillColor: const Color(0xFFF2F2F2),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide.none,
-                            ),
-                            prefixIcon: const Icon(
-                              Icons.location_on,
-                              color: Colors.red,
-                            ),
-                          ),
-                          items: allStations
-                              .map(
-                                (s) => DropdownMenuItem(
-                                  value: s,
-                                  child: Text(s.getLocalizedName(isArabic)),
+                        // To Field (Text Input with Auto-Resolve)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            TextFormField(
+                              controller: _destinationController,
+                              decoration: InputDecoration(
+                                labelText: 'Destination Address',
+                                hintText: 'e.g. Cairo Tower, City Stars...',
+                                labelStyle: const TextStyle(
+                                  fontWeight: FontWeight.bold,
                                 ),
-                              )
-                              .toList(),
-                          onChanged: (val) => setState(() => _endStation = val),
+                                filled: true,
+                                fillColor: const Color(0xFFF2F2F2),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide.none,
+                                ),
+                                prefixIcon: const Icon(
+                                  Icons.location_on,
+                                  color: Colors.red,
+                                ),
+                                suffixIcon: IconButton(
+                                  icon: _isResolvingStation
+                                      ? const SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                          ),
+                                        )
+                                      : const Icon(
+                                          Icons.search,
+                                          color: Colors.grey,
+                                        ),
+                                  onPressed: _isResolvingStation
+                                      ? null
+                                      : _resolveDestination,
+                                ),
+                              ),
+                              onFieldSubmitted: (_) => _resolveDestination(),
+                            ),
+                            if (_resolvedStationInfo != null)
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  top: 8.0,
+                                  left: 12.0,
+                                ),
+                                child: Text(
+                                  _resolvedStationInfo!,
+                                  style: const TextStyle(
+                                    color: Colors.green,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                         const SizedBox(height: 24),
 

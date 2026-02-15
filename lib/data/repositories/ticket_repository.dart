@@ -16,12 +16,16 @@ class TicketRepository {
   }
 
   Future<void> saveTicket(TicketModel ticket) async {
+    await saveTickets([ticket]);
+  }
+
+  Future<void> saveTickets(List<TicketModel> tickets) async {
     // MOCK Implementation
     final prefs = await SharedPreferences.getInstance();
     // We fetch current history to append; in a real app this might be optimized
     final List<TicketModel> currentHistory = await getTickets();
 
-    final updatedHistory = [...currentHistory, ticket];
+    final updatedHistory = [...currentHistory, ...tickets];
     final List<String> list = updatedHistory
         .map((e) => jsonEncode(e.toJson()))
         .toList();

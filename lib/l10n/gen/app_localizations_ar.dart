@@ -326,4 +326,19 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get tickets => 'تذاكر';
+
+  @override
+  String get validForOneTimeUse => 'صالح للاستخدام مرة واحدة';
+
+  @override
+  String get orderId => 'رقم الطلب';
+
+  @override
+  String get generatedTickets => 'التذاكر المصدرة';
+
+  @override
+  String get myActivity => 'نشاطي';
+
+  @override
+  String get tripHistory => 'سجل الرحلات';
 }

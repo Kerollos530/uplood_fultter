@@ -27,6 +27,10 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     final isLoading = ref.watch(paymentLoadingProvider);
     final l10n = AppLocalizations.of(context)!;
 
+    // Get passenger count from extra, default to 1 if null
+    final int passengerCount = (GoRouterState.of(context).extra as int?) ?? 1;
+    final double totalPrice = (route?.totalCost ?? 0) * passengerCount;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -182,7 +186,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
               children: [
                 Text(l10n.total, style: const TextStyle(color: Colors.grey)),
                 Text(
-                  "${route?.totalCost ?? 0.00} EGP",
+                  "$totalPrice EGP",
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
@@ -207,33 +211,45 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                           await ref
                               .read(paymentServiceProvider)
                               .processPayment(
-                                route.totalCost,
+                                totalPrice,
                                 "4242424242424242",
                                 "12/25",
                                 "123",
                               );
 
-                          // 3. Create Ticket Object
-                          final ticket = TicketModel(
-                            ticketId: DateTime.now().millisecondsSinceEpoch
-                                .toString(),
-                            userId: user?.id ?? 'guest',
-                            sourceStationId: route.segments.first.from.id,
-                            destinationStationId: route.segments.last.to.id,
-                            sourceNameEn: route.segments.first.from.nameEn,
-                            destinationNameEn: route.segments.last.to.nameEn,
-                            price: route.totalCost,
-                            timestamp: DateTime.now(),
-                            transportTypes: route.segments
-                                .map((s) => s.mode.name)
-                                .toSet()
-                                .toList(),
-                          );
+                          // 3. Create Ticket Objects
+                          final List<TicketModel> tickets = [];
+                          final now = DateTime.now();
 
-                          // 4. Save Ticket (History)
+                          for (int i = 0; i < passengerCount; i++) {
+                            // Ensure unique ID for each ticket (timestamp + index)
+                            final ticketId = "${now.millisecondsSinceEpoch}_$i";
+
+                            tickets.add(
+                              TicketModel(
+                                ticketId: ticketId,
+                                userId: user?.id ?? 'guest',
+                                sourceStationId: route.segments.first.from.id,
+                                destinationStationId: route.segments.last.to.id,
+                                sourceNameEn: route.segments.first.from.nameEn,
+                                destinationNameEn:
+                                    route.segments.last.to.nameEn,
+                                price: route.totalCost, // Price per ticket
+                                timestamp: now,
+                                transportTypes: route.segments
+                                    .map((s) => s.mode.name)
+                                    .toSet()
+                                    .toList(),
+                                passengerIndex: i + 1,
+                                totalPassengers: passengerCount,
+                              ),
+                            );
+                          }
+
+                          // 4. Save Tickets (History)
                           await ref
                               .read(historyProvider.notifier)
-                              .addTicket(ticket);
+                              .addTickets(tickets);
 
                           // 5. Navigate Success
                           if (context.mounted) {
@@ -241,7 +257,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                             // though GoRouter handles it well.
                             // But since we are in a finally block for loading = false,
                             // we should just navigate.
-                            context.go('/ticket', extra: ticket);
+                            context.go('/ticket', extra: tickets);
                           }
                         } catch (e) {
                           // 6. Handle Error
